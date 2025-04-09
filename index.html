@@ -17,6 +17,9 @@
             height: 100vh;
             background-color: white;
             color: black;
+            background-image: url('background-image.jpg'); /* Replace with your image */
+            background-repeat: repeat;
+            background-size: 200px auto; /* Adjust size */
         }
         .timer-container {
             display: flex;
@@ -29,10 +32,16 @@
             font-size: 7vw;
             width: 90%;
             text-align: center;
+            background: rgba(255, 255, 255, 0.8); /* Slight transparency for readability */
+            padding: 10px;
+            border-radius: 10px;
         }
         .label {
             font-size: 3vw;
             margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
         }
         .side-image {
             width: 20vw;
@@ -41,7 +50,7 @@
     </style>
 </head>
 <body>
-    <img class="side-image" src="left-image.jpg" alt="Left Side Image">
+    <img class="side-image" src="left-image.png" alt="Left Side Image">
     
     <div class="timer-container">
         <div class="label">Time Kris has been nicotine-free:</div>
@@ -51,7 +60,7 @@
         <div class="timer" id="countDownTimer"></div>
     </div>
     
-    <img class="side-image" src="right-image.jpg" alt="Right Side Image">
+    <img class="side-image" src="right-image.png" alt="Right Side Image">
 
     <script>
         function updateCountUpTimer() {
