@@ -1,104 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timers for Kris</title>
-    <style>
-        body {
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Timers & Snake Game</title>
+      <style>
+         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: white;
+            color: black;
+            background-image: url('background-image.jpg');
+            background-repeat: repeat;
+            background-size: 200px auto;
+         }
+         .content-container {
+            display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: white;
-            color: black;
-            background-image: url('background-image.jpg'); /* Replace with your image */
-            background-repeat: repeat;
-            background-size: 200px auto; /* Adjust size */
-        }
-        .timer-container {
+            width: 100%;
+            flex-grow: 1;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            padding: 10px;
+            box-sizing: border-box;
+         }
+         .timer-container {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             flex-grow: 1;
-        }
-        .timer {
-            font-size: 7vw;
+            padding: 10px;
+            min-width: 280px; /* Ensure minimum width for readability */
+         }
+         .timer {
+            font-size: clamp(24px, 7vw, 60px); /* Responsive font size with min and max */
             width: 90%;
             text-align: center;
-            background: rgba(255, 255, 255, 0.8); /* Slight transparency for readability */
+            background: rgba(255, 255, 255, 0.8);
             padding: 10px;
             border-radius: 10px;
-        }
-        .label {
-            font-size: 3vw;
+            margin-bottom: 15px;
+         }
+         .label {
+            font-size: clamp(16px, 3vw, 28px); /* Responsive font size */
             margin-bottom: 10px;
             background: rgba(255, 255, 255, 0.8);
             padding: 5px;
             border-radius: 5px;
-        }
-        .side-image {
-            width: 20vw;
+         }
+         .side-image {
+            width: clamp(100px, 25vw, 200px); /* Increased size from previous values */
             height: auto;
-        }
-    </style>
-</head>
-<body>
-    <img class="side-image" src="left-image.png" alt="Left Side Image">
-    
-    <div class="timer-container">
-        <div class="label">Time Kris has been nicotine-free:</div>
-        <div class="timer" id="countUpTimer"></div>
-
-        <div class="label">Time until Kris's next gift:</div>
-        <div class="timer" id="countDownTimer"></div>
-    </div>
-    
-    <img class="side-image" src="right-image.png" alt="Right Side Image">
-
-    <script>
-        function updateCountUpTimer() {
-            const startDate = new Date("April 8, 2025").getTime();
-            const now = new Date().getTime();
-            const elapsed = now - startDate;
-
-            const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
-
-            document.getElementById("countUpTimer").innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-
-        function updateCountDownTimer() {
-            const now = new Date();
-            let targetDate = new Date(now.getFullYear(), now.getMonth(), 8, 0, 0, 0);
-
-            if (now.getDate() >= 8) {
-                targetDate.setMonth(targetDate.getMonth() + 1);
+            margin: 10px;
+         }
+         .bottom-image {
+            width: clamp(80px, 20vw, 180px); /* Increased size from previous values */
+            height: auto;
+            cursor: pointer;
+            margin: 20px 0;
+         }
+         #gameContainer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+         }
+         #gameCanvas {
+            background: black;
+            max-width: 100%;
+            max-height: 90vh;
+            touch-action: none; /* Prevents default touch actions */
+         }
+         #controls {
+            display: none; /* Hidden by default, shown on mobile */
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            margin-top: 15px;
+         }
+         .control-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+         }
+         .control-btn {
+            width: 70px; /* Larger buttons */
+            height: 70px; /* Larger buttons */
+            margin: 5px;
+            font-size: 28px; /* Larger font */
+            background: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+         }
+         #closeBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 12px 18px; /* Larger button */
+            background: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: 5px;
+            font-size: 18px; /* Larger font */
+            cursor: pointer;
+         }
+         /* Media query for small screens */
+         @media (max-width: 768px) {
+            .content-container {
+               flex-direction: column;
             }
-
-            const timeLeft = targetDate.getTime() - now.getTime();
-
-            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-            document.getElementById("countDownTimer").innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-
-        setInterval(updateCountUpTimer, 1000);
-        setInterval(updateCountDownTimer, 1000);
-
-        updateCountUpTimer();
-        updateCountDownTimer();
-    </script>
-</body>
+            #controls {
+               display: block;
+            }
+            /* Even larger images on mobile */
+            .side-image {
+               width: clamp(120px, 35vw, 250px);
+            }
+            .bottom-image {
+               width: clamp(100px, 30vw, 220px);
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <div class="content-container">
+         <img class="side-image" src="left-image.png" alt="Left Side Image">
+         <div class="timer-container">
+            <div class="label">Time Kris has been nicotine-free:</div>
+            <div class="timer" id="countUpTimer"></div>
+            <div class="label">Time until Kris's next gift:</div>
+            <div class="timer" id="countDownTimer"></div>
+         </div>
+         <img class="side-image" src="right-image.png" alt="Right Side Image">
+      </div>
+      <div class="label">I got bored, press on snake kris and get kris his snus:</div>
+      <img class="bottom-image" src="bottom-image.png" alt="Play Snake" onclick="startGame()">
+      
+      <div id="gameContainer">
+         <button id="closeBtn" onclick="closeGame()">X</button>
+         <canvas id="gameCanvas"></canvas>
+         <div id="controls">
+            <div class="control-row">
+               <div></div>
+               <button class="control-btn" id="upBtn">↑</button>
+               <div></div>
+            </div>
+            <div class="control-row">
+               <button class="control-btn" id="leftBtn">←</button>
+               <div></div>
+               <button class="control-btn" id="rightBtn">→</button>
+            </div>
+            <div class="control-row">
+               <div></div>
+               <button class="control-btn" id="downBtn">↓</button>
+               <div></div>
+            </div>
+         </div>
+      </div>
+      
+      <script>
+         function updateCountUpTimer() {
+            const startDate = new Date("April 8, 2025").getTime();
+            
+            function update() {
+               const now = new Date().getTime();
+               const elapsed = now - startDate;
+               
+               const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+               const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+               const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+               const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+               
+               document.getElementById("countUpTimer").innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+            
+            update();  // Run immediately
+            setInterval(update, 1000);
+         }
+         
+         function updateCountDownTimer() {
+            function update() {
+               const now = new Date();
+               let targetDate = new Date(now.getFullYear(), now.getMonth(), 8, 0, 0, 0);
+               if (now.getDate() >= 8) targetDate.setMonth(targetDate.getMonth() + 1);
+               
+               const timeLeft = targetDate.getTime() - now.getTime();
+               
+               const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+               const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+               const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+               const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+               
+               document.getElementById("countDownTimer").innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+            
+            update();  // Run immediately
+            setInterval(update, 1000);
+         }
+         
+         // Start timers when the page loads
+         window.onload = function () {
+            updateCountUpTimer();
+            updateCountDownTimer();
+         };
+         
+         function startGame() {
+            document.getElementById("gameContainer").style.display = "flex";
+            initSnakeGame();
+         }
+         
+         function closeGame() {
+            document.getElementById("gameContainer").style.display = "none";
+         }
+         
+         function initSnakeGame() {
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
+            
+            // Make canvas responsive but larger
+            function resizeCanvas() {
+               const maxSize = Math.min(window.innerWidth * 0.95, window.innerHeight * 0.8);
+               canvas.width = Math.min(600, maxSize); // Increased from 500 to 600
+               canvas.height = Math.min(600, maxSize); // Increased from 500 to 600
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            const box = canvas.width / 25;  // Adjust box size relative to canvas
+            let snake = [{ x: 10 * box, y: 10 * box }];
+            let direction = "RIGHT";
+            let food = {
+               x: Math.floor(Math.random() * 25) * box,
+               y: Math.floor(Math.random() * 25) * box
+            };
+            let score = 0; // Track score
+            
+            // Load images
+            const snakeImg = new Image();
+            snakeImg.src = "snake-image.png";
+            
+            const foodImg = new Image();
+            foodImg.src = "food-image.png";
+            
+            // Keyboard control
+            document.addEventListener("keydown", changeDirection);
+            
+            // Touch controls for mobile
+            document.getElementById("upBtn").addEventListener("click", function() {
+               if (direction !== "DOWN") direction = "UP";
+            });
+            document.getElementById("downBtn").addEventListener("click", function() {
+               if (direction !== "UP") direction = "DOWN";
+            });
+            document.getElementById("leftBtn").addEventListener("click", function() {
+               if (direction !== "RIGHT") direction = "LEFT";
+            });
+            document.getElementById("rightBtn").addEventListener("click", function() {
+               if (direction !== "LEFT") direction = "RIGHT";
+            });
+            
+            // Swipe detection
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            canvas.addEventListener("touchstart", function(e) {
+               touchStartX = e.touches[0].clientX;
+               touchStartY = e.touches[0].clientY;
+               e.preventDefault();
+            }, false);
+            
+            canvas.addEventListener("touchmove", function(e) {
+               e.preventDefault();
+            }, false);
+            
+            canvas.addEventListener("touchend", function(e) {
+               const touchEndX = e.changedTouches[0].clientX;
+               const touchEndY = e.changedTouches[0].clientY;
+               
+               const deltaX = touchEndX - touchStartX;
+               const deltaY = touchEndY - touchStartY;
+               
+               // Determine swipe direction based on which delta is larger
+               if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                  if (deltaX > 0 && direction !== "LEFT") direction = "RIGHT";
+                  else if (deltaX < 0 && direction !== "RIGHT") direction = "LEFT";
+               } else {
+                  if (deltaY > 0 && direction !== "UP") direction = "DOWN";
+                  else if (deltaY < 0 && direction !== "DOWN") direction = "UP";
+               }
+               
+               e.preventDefault();
+            }, false);
+            
+            function changeDirection(event) {
+               if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+               else if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+               else if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+               else if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+            }
+            
+            function drawGame() {
+               ctx.fillStyle = "black";
+               ctx.fillRect(0, 0, canvas.width, canvas.height);
+               
+               // Draw food - made larger
+               ctx.drawImage(foodImg, food.x, food.y, box * 1.2, box * 1.2);
+               
+               // Draw snake - made larger
+               snake.forEach((segment) => ctx.drawImage(snakeImg, segment.x, segment.y, box * 1.2, box * 1.2));
+               
+               // Draw score
+               ctx.fillStyle = "white";
+               ctx.font = `${Math.max(16, canvas.width / 25)}px Arial`;
+               ctx.fillText(`Score: ${score}`, 10, 20);
+               
+               let newHead = { ...snake[0] };
+               if (direction === "UP") newHead.y -= box;
+               else if (direction === "DOWN") newHead.y += box;
+               else if (direction === "LEFT") newHead.x -= box;
+               else if (direction === "RIGHT") newHead.x += box;
+               
+               // Check for collision with food
+               if (Math.abs(newHead.x - food.x) < box * 0.7 && Math.abs(newHead.y - food.y) < box * 0.7) {
+                  score++; // Increment score
+                  food = {
+                     x: Math.floor(Math.random() * 25) * box,
+                     y: Math.floor(Math.random() * 25) * box
+                  };
+               } else {
+                  snake.pop();
+               }
+               
+               // Check for collision with walls
+               if (newHead.x < 0 || newHead.x >= canvas.width || newHead.y < 0 || newHead.y >= canvas.height) {
+                  alert(`Game Over! Your score: ${score}`);
+                  closeGame();
+                  return;
+               }
+               
+               // Check for collision with self
+               for (let i = 0; i < snake.length; i++) {
+                  if (snake[i].x === newHead.x && snake[i].y === newHead.y) {
+                     alert(`Game Over! Your score: ${score}`);
+                     closeGame();
+                     return;
+                  }
+               }
+               
+               snake.unshift(newHead);
+            }
+            
+            const gameLoop = setInterval(drawGame, 100);
+            
+            // Clean up when game closes
+            document.getElementById("closeBtn").addEventListener("click", function() {
+               clearInterval(gameLoop);
+            });
+         }
+      </script>
+   </body>
 </html>
