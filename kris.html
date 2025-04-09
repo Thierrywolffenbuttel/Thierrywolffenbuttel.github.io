@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timers for Kris</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: white;
+            color: black;
+        }
+        .timer-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .timer {
+            font-size: 7vw;
+            width: 90%;
+            text-align: center;
+        }
+        .label {
+            font-size: 3vw;
+            margin-bottom: 10px;
+        }
+        .side-image {
+            width: 20vw;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <img class="side-image" src="left-image.jpg" alt="Left Side Image">
+    
+    <div class="timer-container">
+        <div class="label">Time Kris has been nicotine-free:</div>
+        <div class="timer" id="countUpTimer"></div>
+
+        <div class="label">Time until Kris's next gift:</div>
+        <div class="timer" id="countDownTimer"></div>
+    </div>
+    
+    <img class="side-image" src="right-image.jpg" alt="Right Side Image">
+
+    <script>
+        function updateCountUpTimer() {
+            const startDate = new Date("April 8, 2025").getTime();
+            const now = new Date().getTime();
+            const elapsed = now - startDate;
+
+            const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+
+            document.getElementById("countUpTimer").innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        function updateCountDownTimer() {
+            const now = new Date();
+            let targetDate = new Date(now.getFullYear(), now.getMonth(), 8, 0, 0, 0);
+
+            if (now.getDate() >= 8) {
+                targetDate.setMonth(targetDate.getMonth() + 1);
+            }
+
+            const timeLeft = targetDate.getTime() - now.getTime();
+
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            document.getElementById("countDownTimer").innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        setInterval(updateCountUpTimer, 1000);
+        setInterval(updateCountDownTimer, 1000);
+
+        updateCountUpTimer();
+        updateCountDownTimer();
+    </script>
+</body>
+</html>
